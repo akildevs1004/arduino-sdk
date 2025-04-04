@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Device Settings</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+
+    .header {
+      background-color: #1c3b50;
+      color: white;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header img {
+      height: 40px;
+    }
+
+    .header .time {
+      font-size: 20px;
+    }
+
+    .container {
+      margin: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin: 0 0 20px;
+    }
+
+    .filter {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .filter select,
+    .filter input[type="date"] {
+      padding: 5px;
+      font-size: 16px;
+    }
+
+    .filter .date-range {
+      display: flex;
+      align-items: center;
+    }
+
+    .filter .date-range input {
+      margin-left: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    table,
+    th,
+    td {
+      border: 1px solid #ddd;
+    }
+
+    th,
+    td {
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .pagination select {
+      padding: 5px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <img src="http://{ipAddress}/logo" alt="Logo">
+
+    <div>{ipAddress}</div>
+
+     
+    <div><a style="color:red;text-decoration:none" href="">Restart</a></div>
+
+    <div class="time">   <div id="time">Loading time...</div></div>
+  </div>
+  <div class="container">
+    
+    <span style="width:30%;text-align:left;float:left"><h1>  Settings</h1></span>
+    <span style="width:70%;text-align:left"><span style="color:green">{GlobalWebsiteResponseMessage}</span>
+    
+    <span style="color:red">{GlobalWebsiteErrorMessage}</span>
+    </span>
+
+
+    <div class="container">
+ <form action="/submit-form1" method="POST">
+  <table>
+  
+  <tr>
+  
+  <td colspan=2 style="color:red">
+  Network Settings
+  </td>
+  </tr>
+    <tr>
+      <td><label for="connectionType">Connection Type</label></td>
+      <td>
+        <select name="wifi_or_ethernet" id="wifi_or_ethernet"   style="width:200px">
+          <option value="1">WiFi</option> 
+          <option value="0">Ethernet</option>
+        </select>
+      </td>
+    </tr>
+          
+    <!-- WiFi Fields -->
+    <tr id="wifiFields">
+      <td><label for="wifiSsid">Wifi SSID Name:</label></td>
+      <td><input id="wifi_ssid" style="width:200px" type="text" value='{wifi_ssid}' name="wifi_ssid"></td>
+    </tr>
+    <tr id="wifiPasswordField">
+      <td><label for="wifiPass">Wifi  Password:</label></td>
+      <td><input id="wifi_password" style="width:200px" type="text" value='{wifi_password}' name="wifi_password"></td>
+    </tr>
+    <tr id="wifiIpField">
+      <td><label for="wifiIp">WiFi IP:</label></td>
+      <td><input id="wifi_ip" style="width:200px" value='{wifi_ip}' name="wifi_ip"></td>
+    </tr>
+    
+    <!-- Ethernet Fields -->
+    <tr id="ethernetFields" style="display:none1">
+      <td><label for="ethIp">Ethernet IP:</label></td>
+      <td><input id="eth_ip" style="width:200px" value='{eth_ip}' name="eth_ip"></td>
+    </tr>
+    <tr id="ethGatewayField" style="display:none1">
+      <td><label for="ethGateway">Ethernet Gateway:</label></td>
+      <td><input id="eth_gateway" style="width:200px" value='{eth_gateway}' name="eth_gateway"></td>
+    </tr>
+    <tr id="ethSubnetField" style="display:none1">
+      <td><label for="ethSubnet">Ethernet Subnet:</label></td>
+      <td><input id="eth_subnet" style="width:200px" value='{eth_subnet}' name="eth_subnet"></td>
+    </tr>
+	
+	
+	
+	<tr>
+	
+	<tr>
+  
+  <td colspan=2 style="color:red">
+  Device Settings
+  </td>
+  </tr>
+    
+          
+    
+    
+    <tr  >
+      <td><label for="wifiIp">Device Serial Number:</label></td>
+      <td><input id="device_serial_number" style="width:200px" value='{device_serial_number}' name="device_serial_number"></td>
+    </tr>
+	
+	<td colspan=2 style="color:red">
+	Server Settings
+	</td>
+	</tr>
+	
+	
+	
+	
+	
+	<tr>
+            <td><label for="serverURL">Server URL:</label></td>
+            <td><input style="width:200px" type="text" id="server_url" name="server_url" value="{server_url}" required> 
+     </td>
+          </tr>
+          <tr>
+            <td><label for="serverURL1">Heartbeat Interval(Seconds):</label></td>
+            <td>  <select style="width:200px" name="heartbeat" id="heartbeat"  value="{heartbeat}" >
+          
+		  
+		    
+        </select> </td>
+          </tr>
+           
+          <tr>
+            <td><label for="serverURL3">Socket IP address:</label></td>
+            <td><input style="width:200px" type="text" id="server_ip" name="server_ip" value="{server_ip}" required> </td>
+          </tr>
+          <tr>
+            <td><label for="serverURL3">Socket Port :</label></td>
+            <td><input style="width:200px" type="text" id="server_port" name="server_port" value="{server_port}" required> 
+            
+            <div id="socketConnectionStatus"></div>
+            </td>
+          </tr>
+	
+	
+	
+	
+	<tr>
+	
+	<td colspan=2 style="color:red">
+	Sensor Settings
+	</td>
+	</tr>
+	
+	 <tr>
+        <td style="width:400px"><label for="temp_checkbox">Temperature:</label></td>
+        <td><input style="width:200px" type="checkbox"  name="temp_checkbox" id="temp_checkbox" onclick="toggleInput('temp_checkbox', 'max_temperature');toggleInput('temp_checkbox', 'min_temperature')"></td>
+    </tr>
+    <tr>
+        <td><label for="max_temperature">Max Temperature Threshold (numbers):</label></td>
+        <td><input style="width:200px" type="number" id="max_temperature" name="max_temperature" required disabled></td>
+    </tr>
+     <tr>
+        <td><label for="min_temperature">Min Temperature Threshold (numbers):</label></td>
+        <td><input style="width:200px" type="number" id="min_temperature" name="min_temperature" required disabled></td>
+    </tr>
+
+    <tr>
+        <td><label for="humidity_checkbox">Humidity:</label></td>
+        <td><input style="width:200px" type="checkbox"  name="humidity_checkbox" value="1" id="humidity_checkbox" onclick="toggleInput('humidity_checkbox', 'max_humidity')"></td>
+    </tr>
+    <tr>
+        <td><label for="max_humidity">Humidity Threshold (numbers):</label></td>
+        <td><input style="width:200px" type="number" id="max_humidity" name="max_humidity" required disabled></td>
+    </tr>
+
+    <tr>
+        <td><label for="water_checkbox">Water Leakage:</label></td>
+        <td><input style="width:200px" type="checkbox"  name="water_checkbox" value="1" id="water_checkbox"></td>
+    </tr>
+
+    <tr>
+        <td><label for="fire_checkbox">Fire:</label></td>
+        <td><input style="width:200px" type="checkbox"  name="fire_checkbox" value="1" id="fire_checkbox"></td>
+    </tr>
+
+    <tr>
+        <td><label for="power_checkbox">Power:</label></td>
+        <td><input style="width:200px" type="checkbox"  name="power_checkbox" value="1" id="power_checkbox"></td>
+    </tr>
+
+     <tr>
+        <td><label for="doorcontact_checkbox">Door Contact:</label></td>
+        <td><input style="width:200px" type="checkbox"  name="doorcontact_checkbox"  value="1" id="doorcontact_checkbox" onclick="toggleInput('doorcontact_checkbox', 'max_doorcontact')"></td>
+    </tr>
+    <tr>
+        <td><label for="max_doorcontact">Door Contact Waiting(Seconds)  :</label></td>
+        <td><input style="width:200px" type="number" id="max_doorcontact" name="max_doorcontact" required disabled></td>
+    </tr>
+	
+	
+	 <tr>
+        <td><label for="siren_checkbox">Siren Sound:</label></td>
+        <td><input style="width:200px" type="checkbox" name="siren_checkbox" value="1" id="siren_checkbox" onclick="toggleInput('siren_checkbox', 'max_siren_play');toggleInput('siren_checkbox', 'max_siren_pause')"></td>
+    </tr>
+    <tr>
+        <td><label for="max_siren_play">Siren Play(Seconds)  :</label></td>
+        <td><input style="width:200px" type="number" id="max_siren_play" name="max_siren_play" required disabled></td>
+    </tr>
+	<tr>
+        <td><label for="max_siren_pause">Siren Pause Time(Seconds)  :</label></td>
+        <td><input style="width:200px" type="number" id="max_siren_pause" name="max_siren_pause" required disabled></td>
+    </tr>
+    
+    <tr>
+      <td></td>
+      <td><input type="submit" value="Submit"></td>
+    </tr>
+  </table>
+  
+  <textarea style="display:none" id="config_json">{config_json}</textarea>
+</form>
+
+<script>
+function toggleConnectionFields() {
+  const connectionType = document.getElementById('wifi_or_ethernet').value;
+  const wifiFields = document.getElementById('wifiFields');
+  const wifiPasswordField = document.getElementById('wifiPasswordField');
+  const wifiIpField = document.getElementById('wifiIpField');
+  const ethernetFields = document.getElementById('ethernetFields');
+  const ethGatewayField = document.getElementById('ethGatewayField');
+  const ethSubnetField = document.getElementById('ethSubnetField');
+
+  if (connectionType === '1') { // WiFi selected
+    wifiFields.style.display = '';
+    wifiPasswordField.style.display = '';
+    wifiIpField.style.display = '';
+    ethernetFields.style.display = 'none';
+    ethGatewayField.style.display = 'none';
+    ethSubnetField.style.display = 'none';
+  } else { // Ethernet selected
+    wifiFields.style.display = 'none';
+    wifiPasswordField.style.display = 'none';
+    wifiIpField.style.display = 'none';
+    ethernetFields.style.display = '';
+    ethGatewayField.style.display = '';
+    ethSubnetField.style.display = '';
+  }
+}
+
+// Initialize on page load //document ready
+document.addEventListener('DOMContentLoaded', function() {
+ // toggleConnectionFields();
+
+ 
+ 
+ const selectElement = document.getElementById("heartbeat");
+const options = generateTimeOptions();
+
+options.forEach(opt => {
+    const optionElement = document.createElement("option");
+    optionElement.value = opt.value;
+    optionElement.textContent = opt.label;
+    selectElement.appendChild(optionElement);
+});
+   loadConfigFileData();
+   
+   
+   
+});
+
+
+function toggleInput(checkboxId, inputId) {
+        document.getElementById(inputId).disabled = !document.getElementById(checkboxId).checked;
+		
+		if(!document.getElementById(checkboxId).checked)
+		{
+		document.getElementById(inputId).value='';
+		}
+    }
+</script>
+
+  <script>
+  function generateTimeOptions() {
+    const options = [];
+    const increments = [5, 10, 15, 30]; // Time increments in seconds and minutes
+    
+    // Generate options for seconds (5s to 55s)
+    for (let sec = 5; sec < 60; sec += 5) {
+        options.push({ id: 'heartbeat', value: sec, label: `${sec} seconds` });
+    }
+    
+    // Generate options for minutes (1 min to 60 min)
+    for (let min = 0; min <= 60; min += 5  ) {
+	if(min==0)
+        options.push({ id: 'heartbeat', value: (min+1) * 60, label: `${(min+1)} minute${(min+1) > 1 ? 's' : ''}` });
+	else 
+        options.push({ id: 'heartbeat', value: min * 60, label: `${min} minute${min > 1 ? 's' : ''}` });
+    }
+     
+    return options;
+}
+        function updateTime() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+
+            // Format the time as HH:MM:SS
+            const timeString = `${hours}:${minutes}:${seconds}`;
+
+            // Display the time in the HTML element
+            document.getElementById('time').textContent = timeString;
+        }
+
+        // Update time immediately
+        updateTime();
+
+        // Update time every second (1000 milliseconds)
+        setInterval(updateTime, 1000);
+    </script>
+	
+	<script>
+	function loadConfigFileData()
+  {
+	
+	//const content = '{"wifi_ssid":"11111111111","wifi_password":"{wifi_password}","wifi_ip":"{wifi_ip}","wifi_or_ethernet":"1","eth_ip":"192.168.1.101","eth_gateway":"192.168.1.1","eth_subnet":"255.255.255.0","server_url":"1111111111111111","heartbeat":"1","server_ip":"{server_ip}","server_port":"{server_port}","max_temperature":"111111111","max_humidity":"1111111"}';
+	
+	const content = document.getElementById("config_json").value;
+   
+  console.log(content); // Raw text content
+try {
+  const jsonData = JSON.parse(content);
+  console.log(jsonData);
+  
+  // Access individual properties
+  console.log("WiFi SSID:", jsonData.wifi_ssid);
+  console.log("Ethernet IP:", jsonData.eth_ip);
+  console.log("Server URL:", jsonData.server_url);
+  
+  document.getElementById('wifi_ssid').value=jsonData.wifi_ssid=="{wifi_ssid}"?'':jsonData.wifi_ssid;
+  document.getElementById('wifi_password').value=jsonData.wifi_password=="{wifi_password}"?'':jsonData.wifi_password;
+  document.getElementById('wifi_ip').value=jsonData.wifi_ip=="{wifi_ip}"?'':jsonData.wifi_ip;
+  document.getElementById('wifi_or_ethernet').value=jsonData.wifi_or_ethernet=="{wifi_or_ethernet}"?'':jsonData.wifi_or_ethernet;
+  document.getElementById('eth_ip').value=jsonData.eth_ip=="{eth_ip}"?'':jsonData.eth_ip;
+  document.getElementById('eth_gateway').value=jsonData.eth_gateway=="{eth_gateway}"?'':jsonData.eth_gateway;
+  document.getElementById('eth_subnet').value=jsonData.eth_subnet=="{eth_subnet}"?'':jsonData.eth_subnet;
+
+  document.getElementById('device_serial_number').value=jsonData.device_serial_number=="{device_serial_number}"?'':jsonData.device_serial_number;
+
+
+  document.getElementById('server_url').value=jsonData.server_url=="{server_url}"?'':jsonData.server_url;
+  document.getElementById('heartbeat').value=jsonData.heartbeat=="{heartbeat}"?'':jsonData.heartbeat;
+  document.getElementById('server_ip').value=jsonData.server_ip=="{server_ip}"?'':jsonData.server_ip;
+  document.getElementById('server_port').value=jsonData.server_port=="{server_port}"?'':jsonData.server_port;
+
+  document.getElementById('min_temperature').value=jsonData.min_temperature=="{min_temperature}"?'':jsonData.min_temperature;
+  document.getElementById('max_temperature').value=jsonData.max_temperature=="{max_temperature}"?'':jsonData.max_temperature;
+
+
+  document.getElementById('max_humidity').value=jsonData.max_humidity=="{max_humidity}"?'':jsonData.max_humidity; 
+
+
+  document.getElementById('max_doorcontact').value=jsonData.max_doorcontact=="{max_doorcontact}"?'':jsonData.max_doorcontact; 
+  document.getElementById('max_siren_play').value=jsonData.max_siren_play=="{max_siren_play}"?'':jsonData.max_siren_play; 
+  document.getElementById('max_siren_pause').value=jsonData.max_siren_pause=="{max_siren_pause}"?'':jsonData.max_siren_pause; 
+
+  document.getElementById('temp_checkbox').checked= jsonData.temp_checkbox;   
+  document.getElementById('water_checkbox').checked= jsonData.water_checkbox; 
+  document.getElementById('fire_checkbox').checked= jsonData.fire_checkbox; 
+  document.getElementById('power_checkbox').checked= jsonData.power_checkbox; 
+  document.getElementById('doorcontact_checkbox').checked= jsonData.doorcontact_checkbox; 
+  document.getElementById('siren_checkbox').checked= jsonData.siren_checkbox;  
+  document.getElementById('humidity_checkbox').checked= jsonData.humidity_checkbox;  
+
+
+toggleInput('temp_checkbox', 'max_temperature');
+toggleInput('temp_checkbox', 'min_temperature') 
+toggleInput('siren_checkbox', 'max_siren_play');
+toggleInput('siren_checkbox', 'max_siren_pause');
+toggleInput('doorcontact_checkbox', 'max_doorcontact');
+toggleInput('humidity_checkbox', 'max_humidity')
+
+
+ 
+
+ 
+
+
+
+ 
+  
+  //toggleConnectionFields();
+  
+  
+  
+  
+  
+} catch (error) {
+  console.error("Error parsing JSON:", error);
+}
+
+}
+	</script>
+
+  </div>
+</body>
+</html>
