@@ -5,8 +5,8 @@ const path = require("path");
 const axios = require("axios");
 
 const app = express();
-const api_port = 6000;
-const socket_port = 6002;
+const api_port = 6000; //SDK Port - Website to Socket (SDK)
+const socket_port = 6002; // Device Port - Device to Socket server
 
 app.use(express.json());
 
