@@ -31,7 +31,7 @@ void socketVerifyConnection() {
 
     Serial.println("Failed to reconnect to the server after multiple attempts.");
   } else {
-    Serial.println("Socket Connection is available");
+    ///////Serial.println("Socket Connection is available");
   }
 }
 
@@ -121,8 +121,8 @@ void socketDeviceHeartBeatToServer() {
 
 void processSocketServerRequests() {
   // Verify if the client is available before reading data
-  socketVerifyConnection();
-  Serial.println("Checking Request from server:--------------------------------------- ");
+  ///////////////////socketVerifyConnection();
+  //Serial.println("Checking Request from server:--------------------------------------- ");
   if (client.connected() && client.available()) {
     String serverRequest = client.readStringUntil('\n');
     Serial.println("Request from server:--------------------------------------- " + serverRequest);
@@ -134,11 +134,11 @@ void processSocketServerRequests() {
     if (serverRequest.indexOf("UPDATE_CONFIG") >= 0) {
       updateConfigServerToDevice(serverRequest);
       Serial.println("--------------------------RESTARTING DEVICE--------------------------------- ");
-       handleHeartbeat();
-       handleRestartDevice();  // Restart device to effect the new cloud settings
+       socketDeviceHeartBeatToServer();
+       /////// handleRestartDevice();  // Restart device to effect the new cloud settings
     }
   } else {
-    Serial.println("No available data or client not connected.");
+    /////////Serial.println("No available data or client not connected.");
   }
 }
 
