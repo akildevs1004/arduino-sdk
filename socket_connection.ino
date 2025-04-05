@@ -102,7 +102,7 @@ void socketDeviceHeartBeatToServer() {
     DynamicJsonDocument heartbeatDoc(1024);
     heartbeatDoc["serialNumber"] = config["device_serial_number"];
     heartbeatDoc["type"] = "heartbeat";
-    heartbeatDoc["config"] = readConfig("config.json");
+   heartbeatDoc["config"] = readConfig("config.json");
 
     String heartbeatData;
     serializeJson(heartbeatDoc, heartbeatData);
@@ -240,16 +240,22 @@ void handleHeartbeat() {
 
   // Serial.print("Heartbeat ");
   // Serial.println(config["heartbeat"].as<int>());
-  // unsigned long currentMillis = millis();
-  // if (currentMillis - previousHeartbeatMillis >= config["heartbeat"].as<int>() * 1000) {
-  //   previousHeartbeatMillis = currentMillis;
-  //   socketDeviceHeartBeatToServer();
-  // }
+
+  int heartBeatSeconds=10;
+  if(config["heartbeat"].as<int>()>10)
+  {
+    heartBeatSeconds=10;
+  }
   unsigned long currentMillis = millis();
   if (currentMillis - previousHeartbeatMillis >= 5 * 1000) {
     previousHeartbeatMillis = currentMillis;
     socketDeviceHeartBeatToServer();
   }
+  // unsigned long currentMillis = millis();
+  // if (currentMillis - previousHeartbeatMillis >= 5 * 1000) {
+  //   previousHeartbeatMillis = currentMillis;
+  //   socketDeviceHeartBeatToServer();
+  // }
 
   unsigned long currentMillisSocket = millis();
 

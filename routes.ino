@@ -167,8 +167,6 @@ void handleForm1Submit() {
   doc["wifi_ip"] = server.arg("wifi_ip");
   doc["wifi_or_ethernet"] = server.arg("wifi_or_ethernet");
 
-
-
   doc["eth_ip"] = server.arg("eth_ip");
   doc["eth_gateway"] = server.arg("eth_gateway");
   doc["eth_subnet"] = server.arg("eth_subnet");

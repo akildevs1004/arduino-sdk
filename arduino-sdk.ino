@@ -7,6 +7,13 @@
 #include <Wire.h>
 #include <DHT22.h>
 #include <HTTPClient.h>
+#include "esp_ping.h"
+#include "esp_log.h"
+#include "lwip/inet.h"
+
+
+
+
 
 WiFiManager wifiManager;
 

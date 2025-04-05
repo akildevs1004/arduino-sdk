@@ -124,7 +124,7 @@
 
 
     <div class="container">
-      <form action="/submit-form1" method="POST">
+      <form action="/submit-form1" method="POST" click="return verifyform()">
         <table>
 
           <tr>
@@ -386,7 +386,7 @@
 
 
           let selectElement = document.getElementById("heartbeat");
-          let options = generateTimeOptions();
+          let options = generateTimeOptionsHeartbeat();
 
           options.forEach(opt => {
             const optionElement = document.createElement("option");
@@ -395,7 +395,7 @@
             selectElement.appendChild(optionElement);
           });
 
-
+          options = generateTimeOptions();
 
           selectElement = document.getElementById("max_doorcontact");
 
@@ -443,6 +443,18 @@
       </script>
 
       <script>
+        function generateTimeOptionsHeartbeat() {
+          const options = [];
+          const increments = [5, 10, 15, 30]; // Time increments in seconds and minutes
+
+          // Generate options for seconds (5s to 55s)
+          for (let sec = 1; sec <= 10; sec += 1) {
+            options.push({ id: 'heartbeat', value: sec, label: `${sec} seconds` });
+          }
+
+
+          return options;
+        }
         function generateTimeOptions() {
           const options = [];
           const increments = [5, 10, 15, 30]; // Time increments in seconds and minutes
@@ -561,6 +573,32 @@
             console.error("Error parsing JSON:", error);
           }
 
+        }
+        function verifyform() {
+
+          if (document.getElementById('temp_checkbox').checked) {
+            let min_temperature = document.getElementById('min_temperature').value;
+            let max_temperature = document.getElementById('max_temperature').value;
+
+            min_temperature = parseFloat(min_temperature);
+            if (isNaN(min_temperature)) {
+              alert("Invalid Temperature Value")
+              return false;
+            }
+
+          }
+          alert("Ok")
+          return true;
+
+          // let max_humidity = document.getElementById('max_humidity').value;
+
+
+
+
+
+
+
+          return false; // Allow submission
         }
       </script>
 

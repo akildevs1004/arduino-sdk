@@ -123,9 +123,13 @@ setInterval(() => {
   const now = Date.now();
   for (const [serial, data] of Object.entries(deviceConfigs)) {
     const lastSeen = new Date(data.last_heartbeat).getTime();
-    if (now - lastSeen > 5 * 1000) {
+    if (now - lastSeen > 60 * 1000) {
       // 5 mins
-      logWithTime(`Removing Inactive device: ${serial}`);
+      logWithTime(
+        `----Removing Inactive device: ${serial} Diff ${
+          (now - lastSeen) / 1000
+        } Last: ${data.last_heartbeat}`
+      );
       delete deviceConfigs[serial];
     }
   }
