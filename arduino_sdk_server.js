@@ -3,16 +3,17 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const axios = require("axios");
-const app = express();
-const api_port = 6000; // HTTP API port
-const socket_port = 6002; // Socket port
-app.use(express.json()); // This line is crucial for parsing JSON bodies
-// Get today's date in 'YYYY-MM-DD' format
-const today = new Date().toISOString().split("T")[0]; // e.g., "2024-09-11"
-const logFilePath = path.join(__dirname, `${today}.log`);
 
-// Override console.log to write to both console and file
-const logStream = fs.createWriteStream(logFilePath, { flags: "a" }); // Append mode
+const app = express();
+const api_port = 6000;
+const socket_port = 6002;
+
+app.use(express.json());
+
+// Utils
+const today = new Date().toISOString().split("T")[0];
+const logFilePath = path.join(__dirname, `${today}.log`);
+const logStream = fs.createWriteStream(logFilePath, { flags: "a" });
 const originalConsoleLog = console.log;
 
 console.log = (...args) => {
@@ -20,83 +21,66 @@ console.log = (...args) => {
     .map((a) => (typeof a === "object" ? JSON.stringify(a) : a))
     .join(" ");
   const timestamp = new Date().toISOString();
-
-  // Log to console
   originalConsoleLog.apply(console, args);
-
-  // Log to file with timestamp
   logStream.write(`[${timestamp}] ${logMessage}\n`);
 };
 
-// In-memory storage
-const deviceConfigs = {}; // { serialNumber: { socket, config_data, last_heartbeat } }
+function logWithTime(...args) {
+  const timestamp = new Date().toISOString();
+  console.log(`[${timestamp}]`, ...args);
+}
 
-// Socket server for ESP32 devices
+// In-memory storage
+const deviceConfigs = {};
+
+// TCP Socket Server
 const server = net.createServer((socket) => {
-  console.log("Server Running");
+  logWithTime("New device connected");
 
   let buffer = "";
 
   socket.on("data", (data) => {
     buffer += data.toString();
+    let boundary = buffer.indexOf("\n");
 
-    let boundary = buffer.indexOf("\n"); // Assuming newline-delimited messages
     while (boundary > -1) {
       const message = buffer.substring(0, boundary);
-      ////////console.log("Message : ", message);
       buffer = buffer.substring(boundary + 1);
 
       try {
         const dataObject = JSON.parse(message);
         const serialNumber = dataObject.serialNumber;
 
-        // Store socket for this device
         deviceConfigs[serialNumber] = deviceConfigs[serialNumber] || {};
         deviceConfigs[serialNumber].socket = socket;
         deviceConfigs[serialNumber].last_heartbeat = new Date().toISOString();
         deviceConfigs[serialNumber].config_data = dataObject.config;
-        if (dataObject.type != "heartbeat")
-          console.log("Received config from device:", serialNumber);
 
-        //console.log(dataObject.type);
-        console.log(
-          new Date().toISOString(),
-          "Received Message from device:",
-          serialNumber,
-          dataObject.type
-        );
+        if (dataObject.type === "heartbeat") {
+          logWithTime("Received heartbeat from device:", serialNumber);
+        } else if (dataObject.type === "config") {
+          logWithTime("Received config from device:", serialNumber);
+        } else {
+          logWithTime(
+            "Received",
+            dataObject.type,
+            "from device:",
+            serialNumber
+          );
+        }
 
-        // if (dataObject.type == "switchStatus") {
-        //   console.log(dataObject.switchStatus);
+        // Optional action: switchStatus
+        // if (dataObject.type === "switchStatus") {
         //   const postData = {
         //     room_number: serialNumber,
         //     status: dataObject.switchStatus,
         //   };
-
-        //   axios
-        //     .post(
-        //       "https://backend.ezhms.com/api/update_device_room_fill_status",
-        //       postData
-        //     )
-        //     .then((response) => {
-        //       console.log("Response data:", response.data);
-        //     })
-        //     .catch((error) => {
-        //       console.error("Error posting data:", message, error.message);
-        //     });
+        //   axios.post("https://backend.ezhms.com/api/update_device_room_fill_status", postData)
+        //     .then(response => logWithTime("Backend response:", response.data))
+        //     .catch(error => logWithTime("Error posting data:", error.message));
         // }
-
-        if (dataObject.type === "heartbeat") {
-          // Handle heartbeat data
-          deviceConfigs[serialNumber].last_heartbeat = new Date().toISOString();
-          console.log("Received heartbeat from device:", serialNumber);
-        } else if (dataObject.type === "config") {
-          // Handle configuration data
-          deviceConfigs[serialNumber].config_data = dataObject.config;
-          console.log("Received config from device:", serialNumber);
-        }
       } catch (err) {
-        console.error("Error parsing message:", err);
+        logWithTime("Error parsing message:", err.message);
       }
 
       boundary = buffer.indexOf("\n");
@@ -104,107 +88,125 @@ const server = net.createServer((socket) => {
   });
 
   socket.on("end", () => {
-    console.log("ESP32 disconnected");
+    console.log("Device socket closed", hadError ? "with error" : "gracefully");
+    logWithTime("Device disconnected");
   });
 
-  //   socket.on("error", (err) => {
-  //     console.error("SDK Socket error:", err);
-  //   });
+  socket.on("close", (hadError) => {
+    console.log("Device socket closed", hadError ? "with error" : "gracefully");
+
+    // Find and remove the device from memory
+    for (const serial in deviceConfigs) {
+      if (deviceConfigs[serial].socket === socket) {
+        console.log("Device disconnected:", serial);
+        delete deviceConfigs[serial];
+        break;
+      }
+    }
+  });
+
   socket.on("error", (err) => {
     if (err.code === "ECONNRESET") {
-      console.warn("Client connection was reset");
+      logWithTime("Device connection was reset");
     } else {
-      console.error("Socket error:", err);
+      logWithTime("Socket error:", err.message);
     }
   });
 });
 
 server.listen(socket_port, "0.0.0.0", () => {
-  console.log(`SDK server listening on port ${socket_port}`);
+  logWithTime(`SDK server listening on port ${socket_port}`);
 });
 
-// Express HTTP API for PHP
+// Periodic cleanup for stale devices
+setInterval(() => {
+  const now = Date.now();
+  for (const [serial, data] of Object.entries(deviceConfigs)) {
+    const lastSeen = new Date(data.last_heartbeat).getTime();
+    if (now - lastSeen > 5 * 1000) {
+      // 5 mins
+      logWithTime(`Removing Inactive device: ${serial}`);
+      delete deviceConfigs[serial];
+    }
+  }
+}, 5 * 1000); // every 10 mins
+
+// Express API
 app.get("/device-config/:serialNumber", (req, res) => {
   const serialNumber = req.params.serialNumber;
   const deviceData = deviceConfigs[serialNumber];
 
   if (deviceData) {
-    // Check if the device is still connected by checking the socket
     if (deviceData.socket && !deviceData.socket.destroyed) {
       const message = {
         action: "GET_CONFIG",
         serialNumber: serialNumber,
       };
 
-      // Send the message to the device
-      deviceData.socket.write(JSON.stringify(message) + "\n");
+      try {
+        deviceData.socket.write(JSON.stringify(message) + "\n");
+        logWithTime("Sent GET_CONFIG to device:", serialNumber);
+      } catch (e) {
+        logWithTime("Failed to write to socket:", e.message);
+        return res
+          .status(500)
+          .json({ error: "Failed to send message to device" });
+      }
+    } else {
+      return res.status(404).json({ error: "Device SDK not responding" });
+    }
 
-      console.log("Config Message sent to Device");
-    } else res.status(404).json({ error: "Device SDK is not responding" });
-    res.json({
+    return res.json({
       serialNumber: serialNumber,
       config: deviceData.config_data || {},
       last_heartbeat: deviceData.last_heartbeat || "No heartbeat received",
     });
   } else {
-    res
-      .status(404)
-      .json({ error: "Device not available or Communication issue" });
+    return res.status(404).json({ error: "Device not found or disconnected" });
   }
 });
-// POST route to update device config
+
 app.post("/device-config-update/:serialNumber", (req, res) => {
-  console.log("device-config-update");
   const serialNumber = req.params.serialNumber;
-  console.log("Request From Device ", serialNumber);
-  let newConfig = req.body.config;
+  const newConfig = req.body.config;
+
+  logWithTime("Device config update request for:", serialNumber);
+
+  if (!newConfig) {
+    return res.status(400).json({ error: "Missing config data" });
+  }
 
   newConfig.lastUpdated = new Date().toISOString();
-
   const deviceData = deviceConfigs[serialNumber];
 
-  if (deviceData) {
-    // Check if the device is still connected by checking the socket
-    if (deviceData.socket && !deviceData.socket.destroyed) {
-      if (!newConfig) {
-        console.log("Invalid or missing config data");
-        return res
-          .status(400)
-          .json({ error: "Invalid or missing config data" });
-      }
-      deviceData.socket.write(JSON.stringify({ Hello: "Hello" }) + "\n");
-      // Send the updated config to the device
-      const message = {
-        action: "UPDATE_CONFIG",
-        serialNumber: serialNumber,
-        config: newConfig,
-      };
-      //deviceData.socket.write(JSON.stringify(message) + "\n");
-      // Write the message to the device socket
-      try {
-        deviceData.socket.write(JSON.stringify(message) + "\n");
-        console.log(`Sent updated config to device ${serialNumber}:`, message);
-        res.json({
-          success: true,
-          message: `Config sent to device ${serialNumber}`,
-        });
-      } catch (error) {
-        console.error(`Error sending config to device ${serialNumber}:`, error);
-        res.status(500).json({ error: "Failed to send config to device" });
-      }
-    } else {
-      console.log("Device SDK not found or not connected");
+  if (deviceData && deviceData.socket && !deviceData.socket.destroyed) {
+    const message = {
+      action: "UPDATE_CONFIG",
+      serialNumber: serialNumber,
+      config: newConfig,
+    };
 
-      return res
-        .status(404)
-        .json({ error: "Device not found or not connected" });
+    try {
+      deviceData.socket.write(JSON.stringify(message) + "\n");
+      logWithTime("Sent updated config to device:", serialNumber);
+      return res.json({
+        success: true,
+        message: `Config sent to ${serialNumber}`,
+      });
+    } catch (err) {
+      logWithTime("Error sending config:", err.message);
+      return res.status(500).json({ error: "Failed to send config to device" });
     }
   } else {
-    console.log("Device not found or not connected");
-
-    return res.status(404).json({ error: "Device not found or not connected" });
+    return res.status(404).json({ error: "Device not found or disconnected" });
   }
 });
+
+// Optional test endpoint
+app.get("/ping", (req, res) => {
+  res.json({ status: "OK", time: new Date().toISOString() });
+});
+
 app.listen(api_port, () => {
-  console.log(`API server listening at http://localhost:${api_port}`);
+  logWithTime(`API server listening at http://localhost:${api_port}`);
 });

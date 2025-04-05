@@ -240,8 +240,13 @@ void handleHeartbeat() {
 
   // Serial.print("Heartbeat ");
   // Serial.println(config["heartbeat"].as<int>());
+  // unsigned long currentMillis = millis();
+  // if (currentMillis - previousHeartbeatMillis >= config["heartbeat"].as<int>() * 1000) {
+  //   previousHeartbeatMillis = currentMillis;
+  //   socketDeviceHeartBeatToServer();
+  // }
   unsigned long currentMillis = millis();
-  if (currentMillis - previousHeartbeatMillis >= config["heartbeat"].as<int>() * 1000) {
+  if (currentMillis - previousHeartbeatMillis >= 5 * 1000) {
     previousHeartbeatMillis = currentMillis;
     socketDeviceHeartBeatToServer();
   }
