@@ -16,11 +16,11 @@ String readConfig(String filename) {
   //update Values from Device Config file to Program variables// for device.ino
 
   if (config.containsKey("max_doorcontact")) {
-    countdownDuration = config["max_doorcontact"].as<long>();
+    doorCountdownDuration = config["max_doorcontact"].as<long>();
   }
 
   if (config.containsKey("max_siren_pause")) {
-    resetDuration = config["max_siren_pause"].as<long>();
+    sirenResetDuration = config["max_siren_pause"].as<long>();
   }
 
   if (config.containsKey("heartbeat")) {
@@ -30,9 +30,43 @@ String readConfig(String filename) {
   if (config.containsKey("max_temperature")) {
     TEMPERATURE_THRESHOLD = config["max_temperature"].as<double>();
   }
+   if (config.containsKey("max_humidity")) {
+    HUMIDIY_THRESHOLD = config["max_humidity"].as<double>();
+  }
   if (config.containsKey("server_url")) {
     serverURL = config["server_url"].as<String>();
   }
+
+  if (config.containsKey("temp_checkbox")) {
+    temp_checkbox = config["temp_checkbox"].as<bool>();
+  }
+  if (config.containsKey("humidity_checkbox")) {
+    humidity_checkbox = config["humidity_checkbox"].as<bool>();
+  }
+  if (config.containsKey("water_checkbox")) {
+    water_checkbox = config["water_checkbox"].as<bool>();
+  }
+  if (config.containsKey("fire_checkbox")) {
+    fire_checkbox = config["fire_checkbox"].as<bool>();
+  }
+  if (config.containsKey("power_checkbox")) {
+    power_checkbox = config["power_checkbox"].as<bool>();
+  }
+  if (config.containsKey("doorcontact_checkbox")) {
+    doorcontact_checkbox = config["doorcontact_checkbox"].as<bool>();
+  }
+  if (config.containsKey("siren_checkbox")) {
+    siren_checkbox = config["siren_checkbox"].as<bool>();
+  }
+
+
+  if (doorcontact_checkbox == true) {
+    doorCountdownDuration =config["max_doorcontact"].as<long>();
+  }
+  
+
+ 
+
 
 
 

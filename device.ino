@@ -19,21 +19,39 @@ bool resetTriggered = false;
 unsigned long countdownStartTime = 0;
 unsigned long resetStartTime = 0;
 unsigned long lastDataSendTime = 0;
-long countdownDuration = 180000;          //  3 min- door countdown
-long resetDuration = 300000;              // 5-minute reset
-long heartbeatInterval = 900000;          // 15 minutes (900,000 ms)
+long doorCountdownDuration = 180000;      //  3 min- door countdown
+long sirenResetDuration = 300000;         // 5-minute reset
+long heartbeatInterval = 5000;            // 15 minutes (900,000 ms)
 const float TEMP_CHANGE_THRESHOLD = 0.2;  // 0.2°C minimum change
-double TEMPERATURE_THRESHOLD = 28.0;
+double TEMPERATURE_THRESHOLD = 29.0;
+double HUMIDIY_THRESHOLD = 29.0;
+
+
+bool temp_checkbox = false;
+bool humidity_checkbox = false;
+bool water_checkbox = false;
+bool fire_checkbox = false;
+bool power_checkbox = false;
+bool doorcontact_checkbox = false;
+bool siren_checkbox = false;
+
 
 // WiFiManager wifiManager;
 String serverURL = "https://backend.xtremeguard.org/api/alarm_device_status";
 
 // Current Status Variables
-int doorOpen = 1;
-int waterLeakage = 1;
-int acPowerFailure = 1;
+int doorOpen = 0;
+int waterLeakage = 0;
+int acPowerFailure = 0;
 float temperature = 0;
 float humidity = 0;
+float fire = 0;
+bool alarmTeperature = false;
+bool alarmHumidity = false;
+bool fireDetected = false;
+
+
+
 
 // Previous Status Variables
 int prevDoorOpen = -1;
@@ -88,13 +106,13 @@ void deviceReadSensorsLoop()  //loop
     digitalWrite(BUZZER_PIN, LOW);
     sendDataToServer(true);  // Force update on reset
     delay(20);
-     while (digitalRead(SWITCH5_PIN) == LOW)
-    ;
+    while (digitalRead(SWITCH5_PIN) == LOW)
+      ;
   }
 
   // Check if reset period is active
   if (resetTriggered) {
-    if (millis() - resetStartTime >= resetDuration) {
+    if (millis() - resetStartTime >= sirenResetDuration) {
       resetTriggered = false;
     } else {
       digitalWrite(RED_LED_PIN, LOW);
@@ -136,7 +154,7 @@ bool hasDataChanged() {
   // Check temperature only if change > 0.2°C
   bool tempChanged = fabs(temperature - prevTemperature) > TEMP_CHANGE_THRESHOLD;
 
- 
+
 
 
   // Update previous values if changed
@@ -163,9 +181,16 @@ void processAlerts() {
   else if (temperature >= TEMPERATURE_THRESHOLD) {
     digitalWrite(RED_LED_PIN, HIGH);
     digitalWrite(BUZZER_PIN, HIGH);
+    alarmTeperature = true;
+  } else if (humidity >= HUMIDIY_THRESHOLD) {
+    digitalWrite(RED_LED_PIN, HIGH);
+    digitalWrite(BUZZER_PIN, HIGH);
+    alarmHumidity = true;
   }
+
+
   // Priority 4: Door countdown
-  else if (countdownStarted && (millis() - countdownStartTime >= countdownDuration)) {
+  else if (countdownStarted && (millis() - countdownStartTime >= doorCountdownDuration)) {
     digitalWrite(RED_LED_PIN, HIGH);
     digitalWrite(BUZZER_PIN, HIGH);
   }
@@ -174,6 +199,8 @@ void processAlerts() {
     digitalWrite(RED_LED_PIN, LOW);
     digitalWrite(BUZZER_PIN, LOW);
     isSystemGood = true;
+    alarmHumidity = false;
+    alarmTeperature = false;
   }
 
   // Update door countdown state
@@ -187,33 +214,81 @@ void processAlerts() {
 
 void sendDataToServer(bool forceSend) {
 
- if (String(temperature) == "-273.00" || String(temperature) == "0.00")  //ignore sensor is not installed 
-  {
-     
-     
+  if (serverURL != "") {
+
+
+
+    if (String(temperature) == "-273.00" || String(temperature) == "0.00")  //ignore sensor is not installed
+    {
+
+
+    } else {
+
+
+      HTTPClient http;
+
+      String jsonData = "{\"serialNumber\":\"" + config["device_serial_number"].as<String>() + "\",\"humidity\":\"" + String(humidity) + "\",\"temperature\":\"" + String(temperature) + "\",\"doorOpen\":\"" + String(doorOpen) + "\",\"waterLeakage\":\"" + String(waterLeakage) + "\",\"wifiipaddress\":\"" + WiFi.localIP().toString() + "\",\"wifissid\":\"" + String(WiFi.SSID()) +
+
+
+                        "\",\"acPowerFailure\":\"" + String(acPowerFailure) + "\"}";
+
+      StaticJsonDocument<512> doc;
+
+      doc["serialNumber"] = config["device_serial_number"].as<String>();
+      doc["wifiipaddress"] = WiFi.localIP().toString();
+      doc["wifissid"] = WiFi.SSID();
+
+
+      if (temp_checkbox) {
+        doc["temperature"] = String(temperature);
+        doc["alarm_temperature"] = String(alarmTeperature);
+      }
+
+      if (humidity_checkbox) {
+        doc["humidity"] = String(humidity);
+        doc["alarm_humidity"] = String(alarmHumidity);
+      }
+
+
+      if (water_checkbox) {
+        doc["waterLeakage"] = String(waterLeakage);
+      }
+
+      if (fire_checkbox) {
+        doc["fireDetected"] = String(fireDetected);
+        ;
+      }
+
+      if (power_checkbox) {
+        doc["acPowerFailure"] = String(acPowerFailure);
+      }
+
+      if (doorcontact_checkbox) {
+        doc["doorOpen"] = String(doorOpen);
+      }
+
+
+
+      String jsonDataPost;
+      serializeJson(doc, jsonDataPost);
+
+
+      Serial.println("Sending: " + jsonDataPost);
+      http.begin(serverURL);
+      http.addHeader("Content-Type", "application/json");
+      int httpCode = http.POST(jsonDataPost);
+
+      if (httpCode > 0) {
+        Serial.println("HTTP Response: " + String(httpCode));
+      } else {
+        Serial.println("HTTP Error: " + String(httpCode));
+      }
+
+      http.end();
+    }
   }
   else
   {
-
-
-  HTTPClient http;
-
-  String jsonData = "{\"serialNumber\":\"" + config["device_serial_number"].as<String>() + "\",\"humidity\":\"" + String(humidity) + "\",\"temperature\":\"" + String(temperature) + "\",\"doorOpen\":\"" + String(doorOpen) + "\",\"waterLeakage\":\"" + String(waterLeakage) + "\",\"wifiipaddress\":\"" + WiFi.localIP().toString() + "\",\"wifissid\":\"" + String(WiFi.SSID()) +
-
-
-                    "\",\"acPowerFailure\":\"" + String(acPowerFailure) + "\"}";
-
-  Serial.println("Sending: " + jsonData);
-  http.begin(serverURL);
-  http.addHeader("Content-Type", "application/json");
-  int httpCode = http.POST(jsonData);
-
-  if (httpCode > 0) {
-    Serial.println("HTTP Response: " + String(httpCode));
-  } else {
-    Serial.println("HTTP Error: " + String(httpCode));
-  }
-
-  http.end();
+     Serial.println("Servr URL is empty");
   }
 }
