@@ -122,7 +122,7 @@ void socketDeviceHeartBeatToServer() {
 void processSocketServerRequests() {
   // Verify if the client is available before reading data
   ///////////////////socketVerifyConnection();
-  //Serial.println("Checking Request from server:--------------------------------------- ");
+  Serial.println("Checking Request from server:--------------------------------------- ");
   if (client.connected() && client.available()) {
     String serverRequest = client.readStringUntil('\n');
     Serial.println("Request from server:--------------------------------------- " + serverRequest);

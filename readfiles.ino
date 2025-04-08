@@ -30,7 +30,7 @@ String readConfig(String filename) {
   if (config.containsKey("max_temperature")) {
     TEMPERATURE_THRESHOLD = config["max_temperature"].as<double>();
   }
-   if (config.containsKey("max_humidity")) {
+  if (config.containsKey("max_humidity")) {
     HUMIDIY_THRESHOLD = config["max_humidity"].as<double>();
   }
   if (config.containsKey("server_url")) {
@@ -61,11 +61,11 @@ String readConfig(String filename) {
 
 
   if (doorcontact_checkbox == true) {
-    doorCountdownDuration =config["max_doorcontact"].as<long>();
+    doorCountdownDuration = config["max_doorcontact"].as<long>();
   }
-  
 
- 
+
+
 
 
 
@@ -98,7 +98,7 @@ void saveConfig(String filename, String data) {
     return;
   }
 
-  deviceConfigContent=data;
+  deviceConfigContent = data;
   file.print(data);
   file.close();
   Serial.println(data);
@@ -163,5 +163,5 @@ void updateJsonConfig(String filename, String param, String value) {
   Serial.println("Configuration updated successfully.");
 
   Serial.println(param);
+  readConfig("config.json");
 }
-

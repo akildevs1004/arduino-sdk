@@ -225,7 +225,7 @@ void sendDataToServer(bool forceSend) {
     } else {
 
 
-      HTTPClient http;
+      
 
       String jsonData = "{\"serialNumber\":\"" + config["device_serial_number"].as<String>() + "\",\"humidity\":\"" + String(humidity) + "\",\"temperature\":\"" + String(temperature) + "\",\"doorOpen\":\"" + String(doorOpen) + "\",\"waterLeakage\":\"" + String(waterLeakage) + "\",\"wifiipaddress\":\"" + WiFi.localIP().toString() + "\",\"wifissid\":\"" + String(WiFi.SSID()) +
 

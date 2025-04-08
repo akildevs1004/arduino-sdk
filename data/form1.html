@@ -9,7 +9,13 @@
   </span>
 
 
-  <div class="container">
+  <div>
+
+    <div id="divAccountExpired" style="color:red;display:none;font-weight:bold;font-size:20px;">
+      Your Account is expired on {cloud_account_expire}. Alarm Events are Not working.
+
+    </div>
+
     <form action="/submit-form1" method="POST" click="return verifyform()">
       <table>
 
@@ -370,12 +376,12 @@
     console.log(content); // Raw text content
     try {
       const jsonData = JSON.parse(content);
-      console.log(jsonData);
+      console.info(jsonData);
 
       // Access individual properties
-      console.log("WiFi SSID:", jsonData.wifi_ssid);
-      console.log("Ethernet IP:", jsonData.eth_ip);
-      console.log("Server URL:", jsonData.server_url);
+      console.info("WiFi SSID:", jsonData.wifi_ssid);
+      console.info("Ethernet IP:", jsonData.eth_ip);
+      console.info("Server URL:", jsonData.server_url);
 
       document.getElementById('wifi_ssid').value = jsonData.wifi_ssid == "{wifi_ssid}" ? '' : jsonData.wifi_ssid;
       document.getElementById('wifi_password').value = jsonData.wifi_password == "{wifi_password}" ? '' : jsonData.wifi_password;
@@ -422,7 +428,15 @@
 
 
 
+      if (jsonData.cloudAccountActiveDaysRemaining < 30) {
+        alert("Your Account will expire in " + jsonData.cloudAccountActiveDaysRemaining + " days and De-Activate Alarm Events automatically");
+      }
 
+      if (jsonData.cloudAccountActiveDaysRemaining <= 0) {
+        alert("Your Account is Expired. Contact Service Provider.");
+
+        document.getElementById("divAccountExpired").style.display = "block";
+      }
 
 
 

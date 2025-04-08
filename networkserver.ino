@@ -36,27 +36,25 @@ IPAddress wifi_primaryDNS(8, 8, 8, 8);
 IPAddress wifi_secondaryDNS(8, 8, 4, 4);
 
 bool wifiConnected = false;
- 
+
 
 
 
 
 
 //---------------------------NETWORK SETTINGS END------------------------------------------
-void startNetworkProcessStep1()
-{
+void startNetworkProcessStep1() {
   //wifi
   //IPAddress local_IP=IPAddress();;
-  
+
   Serial.print("USE_ETHERNET----------------------");
   Serial.println(USE_ETHERNET);
 
-  configureWifiEtherNetServer();//server start   
- 
+  configureWifiEtherNetServer();  //server start
 }
 
 
-void configureWifiEtherNetServer(){
+void configureWifiEtherNetServer() {
   // Apply configuration
   if (USE_ETHERNET) {
 
@@ -100,17 +98,36 @@ void configureWifiEtherNetServer(){
       Serial.println(ETH.localIP());
       DeviceIPNumber = ETH.localIP().toString();
     }
+
+
+    if (ETH.linkUp()) {
+      configTime(0, 0, "pool.ntp.org");
+      delay(2000);  // Wait for NTP sync
+
+      // // Get today's date
+      todayDate = getCurrentDate();
+      Serial.println("Today's Date: " + todayDate);
+    }
   } else {
-    Serial.print("Wifi SSID");
+    Serial.println("Wifi SSID");
     Serial.println(config["wifi_ssid"].as<String>());
     {
       WiFi.begin(config["wifi_ssid"].as<String>(), config["wifi_password"].as<String>());
 
+      int retryWifiCount = 10;
+      while (WiFi.status() != WL_CONNECTED && retryWifiCount <= 10) {
+        delay(500);
+        Serial.print("Wifi Internet checking...........");
+        retryWifiCount++;
+      }
 
-       while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
-    Serial.print("Wifi Internet checking.");
-  }
+      configTime(0, 0, "pool.ntp.org");
+      delay(2000);  // Wait for NTP sync
+
+      // // Get today's date
+      todayDate = getCurrentDate();
+      Serial.println("Today's Date: " + todayDate);
+
 
       IPAddress gateway_c = WiFi.gatewayIP();
       IPAddress subnet_c = WiFi.subnetMask();
@@ -124,13 +141,10 @@ void configureWifiEtherNetServer(){
       DeviceIPNumber = WiFi.localIP().toString();
     }
   }
- 
-  
-
 }
 
 
-void connectWiFiWithStaticIP() { 
+void connectWiFiWithStaticIP() {
 
   // WIFI_SSID = "akil";
   //  WIFI_PASSWORD = "Akil1234";
