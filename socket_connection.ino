@@ -44,7 +44,7 @@ bool socketConnectServer() {
   String ipString = config["server_ip"].as<String>();
 
 
-    Serial.println("Config Server IP:"+ipString);
+  Serial.println("Config Server IP:" + ipString);
 
 
   if (ipString.length() < sizeof(server_ip_updated)) {
@@ -102,7 +102,7 @@ void socketDeviceHeartBeatToServer() {
     DynamicJsonDocument heartbeatDoc(1024);
     heartbeatDoc["serialNumber"] = config["device_serial_number"];
     heartbeatDoc["type"] = "heartbeat";
-   heartbeatDoc["config"] = readConfig("config.json");
+    heartbeatDoc["config"] = deviceConfigContent;  // ////////readConfig("config.json");
 
     String heartbeatData;
     serializeJson(heartbeatDoc, heartbeatData);
@@ -134,8 +134,8 @@ void processSocketServerRequests() {
     if (serverRequest.indexOf("UPDATE_CONFIG") >= 0) {
       updateConfigServerToDevice(serverRequest);
       Serial.println("--------------------------RESTARTING DEVICE--------------------------------- ");
-       socketDeviceHeartBeatToServer();
-       /////// handleRestartDevice();  // Restart device to effect the new cloud settings
+      socketDeviceHeartBeatToServer();
+      /////// handleRestartDevice();  // Restart device to effect the new cloud settings
     }
   } else {
     /////////Serial.println("No available data or client not connected.");
@@ -221,7 +221,7 @@ void sendResponseToServerDeviceConfiguration(const String& jsonString) {
       DynamicJsonDocument configDoc(1024);
       configDoc["serialNumber"] = config["device_serial_number"];
       configDoc["type"] = "config";
-      configDoc["config"] = readConfig("config.json");
+      configDoc["config"] = deviceConfigContent;  //readConfig("config.json");
 
       String configData;
       serializeJson(configDoc, configData);
@@ -241,10 +241,9 @@ void handleHeartbeat() {
   // Serial.print("Heartbeat ");
   // Serial.println(config["heartbeat"].as<int>());
 
-  int heartBeatSeconds=10;
-  if(config["heartbeat"].as<int>()>10)
-  {
-    heartBeatSeconds=10;
+  int heartBeatSeconds = 10;
+  if (config["heartbeat"].as<int>() > 10) {
+    heartBeatSeconds = 10;
   }
   unsigned long currentMillis = millis();
   if (currentMillis - previousHeartbeatMillis >= 5 * 1000) {

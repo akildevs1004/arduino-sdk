@@ -7,12 +7,12 @@ String readConfig(String filename) {
   }
 
   File file = LittleFS.open(path, "r");
-  String content = file.readString();
+  deviceConfigContent = file.readString();
   Serial.println("Config file   found Success: ");
 
   file.close();
 
-  deserializeJson(config, content);
+  deserializeJson(config, deviceConfigContent);
   //update Values from Device Config file to Program variables// for device.ino
 
   if (config.containsKey("max_doorcontact")) {
@@ -75,7 +75,7 @@ String readConfig(String filename) {
 
 
 
-  return content;
+  return deviceConfigContent;
 }
 
 // Serve static files from LittleFS
@@ -97,6 +97,8 @@ void saveConfig(String filename, String data) {
     Serial.println("Failed to open file for writing: " + filename);
     return;
   }
+
+  deviceConfigContent=data;
   file.print(data);
   file.close();
   Serial.println(data);
@@ -162,3 +164,4 @@ void updateJsonConfig(String filename, String param, String value) {
 
   Serial.println(param);
 }
+

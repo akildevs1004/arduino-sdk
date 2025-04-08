@@ -1,3 +1,4 @@
+ 
 void routes() {
   server.on("/", HTTP_GET, handleLoginPage);
   server.on("/login", HTTP_POST, handleLogin);
@@ -10,6 +11,13 @@ void routes() {
   server.on("/status", HTTP_GET, handleStatus);
   server.on("/logo", HTTP_GET, handleLogoImage);
   server.on("/restart", HTTP_GET, handleRestartDevice);
+  // server.on("/updatefirmware", HTTP_GET, handleUpdateFirmware);
+
+
+  // server.on("/updatefirmwaredatafiles", HTTP_GET, handleUpdatePage);
+  // server.on("/updatefirmwaredatafilessubmit", HTTP_POST, handleFileUpload);
+  //server.onNotFound(handleNotFound);
+
 }
 
 
@@ -52,12 +60,17 @@ void handleLoginPage() {
   }
 
   String html = readFile("/login.html");
-  if (html == "") {
-    html = "<html><body><h2>Login111111111111111</h2><form action='/login' method='POST'>"
-           "User:<input type='text' name='user'><br>"
-           "Password:<input type='password' name='pass'><br>"
-           "<input type='submit' value='Login'></form></body></html>";
-  }
+  // if (html == "") {
+  //   html = "<html><body><h2>Login111111111111111</h2><form action='/login' method='POST'>"
+  //          "User:<input type='text' name='user'><br>"
+  //          "Password:<input type='password' name='pass'><br>"
+  //          "<input type='submit' value='Login'></form></body></html>";
+  // }
+  html.replace("{firmWareVersion}", firmWareVersion);
+  html.replace("{ipAddress}", DeviceIPNumber);
+  html.replace("{loginErrorMessage}", loginErrorMessage);
+
+
   server.send(200, "text/html", html);
 }
 
@@ -67,7 +80,7 @@ void handleLogin() {
   String pass = server.arg("pass");
 
   if (user == USERNAME && pass == PASSWORD) {
-
+    loginErrorMessage = "";
     loginStatus = true;
     Serial.println("Login successful");
     server.sendHeader("Location", "/form1");
@@ -76,6 +89,7 @@ void handleLogin() {
     return;
 
   } else {
+    loginErrorMessage = "Login Failed. Try Again";
     server.sendHeader("Location", "/?login=failed");
     server.send(302);
     Serial.println("Login failed");
@@ -96,20 +110,24 @@ void handleForm1() {
     server.send(302);
     return;
   }
+  String header = readFile("/header.html");
+  delay(1000);
 
   String html = readFile("/form1.html");
-  if (html == "") {
-    html = "<html><head><link rel='stylesheet' href='/styles.css'></head><body>"
-           "<h2>Form 1</h2><form action='/submit-form1' method='POST'>"
-           "Field 1: <input type='text' name='field1'><br>"
-           "Field 2: <input type='text' name='field2'><br>"
-           "<input type='submit' value='Submit'></form>"
-           "<p><a href='/form2'>Go to Form 2</a></p>"
-           "<p><a href='/logout'>Logout</a></p></body></html>";
-  }
+
+  html=header+html;
+  // if (html == "") {
+  //   html = "<html><head><link rel='stylesheet' href='/styles.css'></head><body>"
+  //          "<h2>Form 1</h2><form action='/submit-form1' method='POST'>"
+  //          "Field 1: <input type='text' name='field1'><br>"
+  //          "Field 2: <input type='text' name='field2'><br>"
+  //          "<input type='submit' value='Submit'></form>"
+  //          "<p><a href='/form2'>Go to Form 2</a></p>"
+  //          "<p><a href='/logout'>Logout</a></p></body></html>";
+  // }
 
   // Read saved data
-  String savedData = readConfig("config.json");
+  String savedData = deviceConfigContent;//readConfig("config.json");
 
 
   String field1Value = "";
@@ -119,14 +137,10 @@ void handleForm1() {
     deserializeJson(doc, savedData);
     html.replace("{config_json}", savedData);
 
-    Serial.println("savedData");
-    Serial.println(savedData);
+         html=replaceHeaderContent(html);
 
-    html.replace("{ipaddress}", DeviceIPNumber);
-    html.replace("{ipAddress}", DeviceIPNumber);
-    html.replace("{GlobalWebsiteResponseMessage}", GlobalWebsiteResponseMessage);
-    html.replace("{GlobalWebsiteErrorMessage}", GlobalWebsiteErrorMessage);
-    updateJsonConfig("config.json", "ipaddress", DeviceIPNumber);
+
+
   }
 
   server.send(200, "text/html", html);
@@ -200,8 +214,8 @@ void handleForm1Submit() {
   doc["siren_checkbox"] = server.hasArg("siren_checkbox");
 
 
-Serial.println(server.hasArg("doorcontact_checkbox"));
-Serial.println(server.arg("doorcontact_checkbox"));
+  Serial.println(server.hasArg("doorcontact_checkbox"));
+  Serial.println(server.arg("doorcontact_checkbox"));
 
 
 
@@ -221,6 +235,9 @@ Serial.println(server.arg("doorcontact_checkbox"));
   return;
 }
 
+void handleUpdateFirmware() {
+}
+
 void handleRestartDevice() {
   // if (!isAuthenticated()) {
   //   server.sendHeader("Location", "/");
@@ -230,13 +247,15 @@ void handleRestartDevice() {
 
   server.send(200, "text/html",
               "<html><body>"
-              "<h2>System Reset</h2>"
-              "<p>Device is restarting...</p>"
+              
+              "<p>Device is restarting...Please wait...</p>"
               "<meta http-equiv='refresh' content='5;url=/'></body></html>");
 
   Serial.println("Reset requested - restarting device");
   delay(1000);    // Give time for response to be sent
   ESP.restart();  // This will call setup() again after reboot
+
+  
 }
 
 // Handle Form 2 submission

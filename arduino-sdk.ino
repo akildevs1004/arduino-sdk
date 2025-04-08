@@ -12,8 +12,24 @@
 #include "lwip/inet.h"
 
 
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#include <Update.h>
 
 
+#include <WiFiClient.h>
+
+#include <Update.h>
+#include "FS.h"
+// #include "SPIFFS.h"
+#include <ESPmDNS.h>
+#include <WiFiUdp.h>
+#include <ArduinoOTA.h>
+
+
+
+
+String firmWareVersion = "1.0.0";
 
 WiFiManager wifiManager;
 
@@ -25,6 +41,14 @@ bool loginStatus = false;
 bool USE_ETHERNET = true;
 WiFiClient client;  // Create a client object
 WebServer server(80);
+
+String deviceConfigContent;
+String DeviceIPNumber;
+
+String loginErrorMessage;
+
+String GlobalWebsiteResponseMessage;
+String GlobalWebsiteErrorMessage;
 
 
 
@@ -43,7 +67,7 @@ void setup() {
       if (config["wifi_or_ethernet"].as<String>() == "1")
         USE_ETHERNET = false;
     }
-  } 
+  }
 
   startNetworkProcessStep1();  //load config and start Device web server
 
@@ -52,10 +76,18 @@ void setup() {
   Serial.println("HTTP Server started");
   if (WiFi.status() == WL_CONNECTED) {
 
-    
+
+    updateJsonConfig("config.json", "ipaddress", DeviceIPNumber);
+    updateJsonConfig("config.json", "firmWareVersion", firmWareVersion);
+
+
     socketConnectServer();
     handleHeartbeat();
     devicePinDefination();
+    updateFirmWaresetup();
+    // updateFirmwareDatasetup();
+
+    uploadHTMLsetup();
   }
 }
 
@@ -65,10 +97,22 @@ void loop() {
 
   if (WiFi.status() == WL_CONNECTED) {
 
-     
-    handleHeartbeat();
+
+     handleHeartbeat();
+    updateFirmWareLoop();
 
     //////////////////////////deviceReadSensorsLoop();
     delay(100);  // Non-blocking delay
   }
+}
+
+String replaceHeaderContent(String html )
+{
+  html.replace("{firmWareVersion}", firmWareVersion);
+    html.replace("{ipAddress}", DeviceIPNumber);
+    html.replace("{loginErrorMessage}", loginErrorMessage);
+    html.replace("{GlobalWebsiteResponseMessage}", GlobalWebsiteResponseMessage);
+    html.replace("{GlobalWebsiteErrorMessage}", GlobalWebsiteErrorMessage);
+
+    return html;
 }

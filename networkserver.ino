@@ -36,9 +36,7 @@ IPAddress wifi_primaryDNS(8, 8, 8, 8);
 IPAddress wifi_secondaryDNS(8, 8, 4, 4);
 
 bool wifiConnected = false;
-String DeviceIPNumber = "";
-String GlobalWebsiteResponseMessage = "";
-String GlobalWebsiteErrorMessage = "";
+ 
 
 
 
