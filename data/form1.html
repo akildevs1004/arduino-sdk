@@ -428,15 +428,17 @@
 
 
 
-      if (jsonData.cloudAccountActiveDaysRemaining < 30) {
-        alert("Your Account will expire in " + jsonData.cloudAccountActiveDaysRemaining + " days and De-Activate Alarm Events automatically");
-      }
+
 
       if (jsonData.cloudAccountActiveDaysRemaining <= 0) {
         alert("Your Account is Expired. Contact Service Provider.");
 
         document.getElementById("divAccountExpired").style.display = "block";
       }
+      else
+        if (jsonData.cloudAccountActiveDaysRemaining < 30) {
+          alert("Your Account will expire in " + jsonData.cloudAccountActiveDaysRemaining + " days and De-Activate Alarm Events automatically");
+        }
 
 
 

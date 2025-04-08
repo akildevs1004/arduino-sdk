@@ -170,7 +170,7 @@ a:hover {
 /* -----------Upload HTML css */
     #progressBar {
       width: 100%;
-      background-color: #f3f3f3;
+      /* background-color: #f3f3f3; */
     }
 
     #progressBar div {

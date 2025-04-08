@@ -95,7 +95,7 @@ void socketDeviceHeartBeatToServer() {
 
     socketConnectionStatus = "Connected";
 
-    updateJsonConfig("config.json", "socketConnectionStatus", "Connected");
+    //updateJsonConfig("config.json", "socketConnectionStatus", "Connected");
 
 
 
@@ -108,7 +108,7 @@ void socketDeviceHeartBeatToServer() {
     serializeJson(heartbeatDoc, heartbeatData);
 
     client.println(heartbeatData);
-    Serial.println("Sent heartbeat: ");
+    //Serial.println("Sent heartbeat: ");
 
 
   } else {
@@ -122,10 +122,10 @@ void socketDeviceHeartBeatToServer() {
 void processSocketServerRequests() {
   // Verify if the client is available before reading data
   ///////////////////socketVerifyConnection();
-  Serial.println("Checking Request from server:--------------------------------------- ");
+  //Serial.println("Checking Request from server:--------------------------------------- ");
   if (client.connected() && client.available()) {
     String serverRequest = client.readStringUntil('\n');
-    Serial.println("Request from server:--------------------------------------- " + serverRequest);
+    //Serial.println("Request from server:--------------------------------------- " + serverRequest);
 
     // Handle specific requests from the cloud
     if (serverRequest.indexOf("GET_CONFIG") >= 0) {
@@ -133,7 +133,7 @@ void processSocketServerRequests() {
     }
     if (serverRequest.indexOf("UPDATE_CONFIG") >= 0) {
       updateConfigServerToDevice(serverRequest);
-      Serial.println("--------------------------RESTARTING DEVICE--------------------------------- ");
+      //Serial.println("--------------------------RESTARTING DEVICE--------------------------------- ");
       socketDeviceHeartBeatToServer();
       /////// handleRestartDevice();  // Restart device to effect the new cloud settings
     }
@@ -250,11 +250,7 @@ void handleHeartbeat() {
     previousHeartbeatMillis = currentMillis;
     socketDeviceHeartBeatToServer();
   }
-  // unsigned long currentMillis = millis();
-  // if (currentMillis - previousHeartbeatMillis >= 5 * 1000) {
-  //   previousHeartbeatMillis = currentMillis;
-  //   socketDeviceHeartBeatToServer();
-  // }
+  
 
   unsigned long currentMillisSocket = millis();
 
